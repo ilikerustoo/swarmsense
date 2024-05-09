@@ -13,6 +13,9 @@
   <depend>rclpy</depend>
   <depend>crazyflie_py</depend>
 
+  <!--Might not be necessary-->
+  <depend>tensorflow</depend>
+
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
   <test_depend>ament_pep257</test_depend>
