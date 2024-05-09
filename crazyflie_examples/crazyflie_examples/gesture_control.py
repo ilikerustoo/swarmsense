@@ -21,7 +21,7 @@ import time
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from model import KeyPointClassifier
-from model import PointHistoryClassifier
+# from model import PointHistoryClassifier
 
 from crazyflie_py import Crazyswarm
 
@@ -103,44 +103,31 @@ def get_landing_positions():
 
 
 
+# def run_nice_hover():
 
-# sys.path.append('/home/ilikerustoo/ros2_ws/src/crazyswarm2/crazyflie_examples/crazyflie_examples')
-# import nice_hover
+#     # script_path = '/home/ilikerustoo/ros2_ws/src/crazyswarm2/crazyflie_examples/crazyflie_examples'
 
-# def import_from_path(name, path):
-#     spec = importlib.util.spec_from_file_location(name, path)
-#     module = importlib.util.module_from_spec(spec)
-#     spec.loader.exec_module(module)
-#     return module
+#     # result = subprocess.run(['python3', script_path], capture_output=True, text=True)
 
-# nice_hover = import_from_path("nice_hover", '/home/ilikerustoo/ros2_ws/src/crazyswarm2/crazyflie_examples/crazyflie_examples/figure8.py')
+#     # print("STDOUT:", result.stdout)
+#     # print("STDERR:", result.stderr)
 
 
-def run_nice_hover():
+#     # nice_hover.main()
 
-    # script_path = '/home/ilikerustoo/ros2_ws/src/crazyswarm2/crazyflie_examples/crazyflie_examples'
+#     command = [
 
-    # result = subprocess.run(['python3', script_path], capture_output=True, text=True)
+#     'ros2', 'run', 'crazyflie_examples', 'figure8', '--ros-args', '-p', 'use_sim_time:=True'
+#     ]
 
-    # print("STDOUT:", result.stdout)
-    # print("STDERR:", result.stderr)
+#     result = subprocess.run(command, capture_output=True, text=True)
 
-
-    # nice_hover.main()
-
-    command = [
-
-    'ros2', 'run', 'crazyflie_examples', 'figure8', '--ros-args', '-p', 'use_sim_time:=True'
-    ]
-
-    result = subprocess.run(command, capture_output=True, text=True)
-
-    if result.returncode == 0:
-        print("command success")
-        print("Output:", result.stdout)
-    else:
-        print("Error in executing command")
-        print("Error:", result.stderr)
+#     if result.returncode == 0:
+#         print("command success")
+#         print("Output:", result.stdout)
+#     else:
+#         print("Error in executing command")
+#         print("Error:", result.stderr)
         
 
 
@@ -184,7 +171,6 @@ def main():
     cap.set(cv.CAP_PROP_FRAME_WIDTH, cap_width)
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, cap_height)
 
-    # Model load #############################################################
     mp_hands = mp.solutions.hands
     hands = mp_hands.Hands(
         static_image_mode=use_static_image_mode,
@@ -195,60 +181,40 @@ def main():
 
     keypoint_classifier = KeyPointClassifier()
 
-    # point_history_classifier = PointHistoryClassifier()
-
-    # Read labels ###########################################################
-    # with open('model/keypoint_classifier/keypoint_classifier_label.csv',
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model/keypoint_classifier/keypoint_classifier_label.csv'),
               encoding='utf-8-sig') as f:
         keypoint_classifier_labels = csv.reader(f)
         keypoint_classifier_labels = [
             row[0] for row in keypoint_classifier_labels
         ]
-    # with open(
-    #         'model/point_history_classifier/point_history_classifier_label.csv',
-    #         encoding='utf-8-sig') as f:
-    #     point_history_classifier_labels = csv.reader(f)
-    #     point_history_classifier_labels = [
-    #         row[0] for row in point_history_classifier_labels
-    #     ]
 
-    # Coordinate history #################################################################
     history_length = 16
     point_history = deque(maxlen=history_length)
 
-    # Finger gesture history ################################################
     finger_gesture_history = deque(maxlen=history_length)
 
-    #  ########################################################################
     mode = 0
-    prev_hand_sign_id = ""
     last_recognized_time = {}
 
     while True:
-        # fps = cvFpsCalc.get()
 
-        # Process Key (ESC: end) #################################################
         key = cv.waitKey(10)
         if key == 27:  # ESC
             break
         number, mode = select_mode(key, mode)
 
-        # Camera capture #####################################################
         ret, image = cap.read()
         if not ret:
             break
         image = cv.flip(image, 1)  # Mirror display
         debug_image = copy.deepcopy(image)
 
-        # Detection implementation #############################################################
         image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
 
         image.flags.writeable = False
         results = hands.process(image)
         image.flags.writeable = True
 
-        #  ####################################################################
         if results.multi_hand_landmarks is not None:
             for hand_landmarks, handedness in zip(results.multi_hand_landmarks,
                                                   results.multi_handedness):
@@ -260,11 +226,8 @@ def main():
                 # Conversion to relative coordinates / normalized coordinates
                 pre_processed_landmark_list = pre_process_landmark(
                     landmark_list)
-                pre_processed_point_history_list = pre_process_point_history(
-                    debug_image, point_history)
                 # Write to the dataset file
-                logging_csv(number, mode, pre_processed_landmark_list,
-                            pre_processed_point_history_list)
+                logging_csv(number, mode, pre_processed_landmark_list)
 
                 # Hand sign classification
                 hand_sign_id = keypoint_classifier(pre_processed_landmark_list)
@@ -276,21 +239,17 @@ def main():
                     if hand_sign_id == 2:  # Point gesture
                         if (handedness.classification[0].label[0] == "L"):
                             print("GoBackwards")
-                            # go_bk(allcfs)
                             go_bk()
                         else:
                             print("GoForwards")
-                            # go_fw(allcfs)
                             go_fw()
                     elif hand_sign_id == 0:
                         if(handedness.classification[0].label[0] == "L"):
                             print("Land")
-                            # land(allcfs)
                             land()
                             get_landing_positions()
                             print("Operations completed. Exiting now.")
                             sys.exit()
-                            # reset_to_default()
                         else:
                     
                             print("TakeOff")
@@ -298,55 +257,25 @@ def main():
                     elif hand_sign_id == 1:
                         if(handedness.classification[0].label[0] == "L"):
                             print("GoLeft")
-                            # go_left(allcfs)
                             go_left()
                         else:
                             print("GoRight")
-                            # go_right(allcfs)
                             go_right()
                     elif hand_sign_id == 3:
                         if(handedness.classification[0].label[0] == "L"):
                             print("MoveDown")
-                            # go_down(allcfs)
                             go_down()
                         else:
                             print("MoveUp")
-                            # go_up(allcfs)
                             go_up()
 
-                            
-                            # run_nice_hover()
-                        
-                # Finger gesture classification
-                finger_gesture_id = 0
-                point_history_len = len(pre_processed_point_history_list)
-                if point_history_len == (history_length * 2):
-                    finger_gesture_id = point_history_classifier(
-                        pre_processed_point_history_list)
-
-                # Calculates the gesture IDs in the latest detection
-                finger_gesture_history.append(finger_gesture_id)
-                most_common_fg_id = Counter(
-                    finger_gesture_history).most_common()
 
                 # Drawing part
                 debug_image = draw_bounding_rect(use_brect, debug_image, brect)
                 debug_image = draw_landmarks(debug_image, landmark_list)
-                # debug_image = draw_info_text(
-                #     debug_image,
-                #     brect,
-                #     handedness,
-                #     keypoint_classifier_labels[hand_sign_id],
-                #     point_history_classifier_labels[most_common_fg_id[0][0]],
-                # )
-        # else:
-        #     point_history.append([0, 0])
         
         debug_image = draw_info(debug_image, mode, number)
-
-        # Screen reflection #############################################################
         cv.imshow('Hand Gesture Recognition', debug_image)
-        # time.sleep(3)\
         sleep_ms(50) #lowering the camera framerate, adjust/experiment
 
     cap.release()
@@ -433,30 +362,7 @@ def pre_process_landmark(landmark_list):
     return temp_landmark_list
 
 
-def pre_process_point_history(image, point_history):
-    image_width, image_height = image.shape[1], image.shape[0]
-
-    temp_point_history = copy.deepcopy(point_history)
-
-    # Convert to relative coordinates
-    base_x, base_y = 0, 0
-    for index, point in enumerate(temp_point_history):
-        if index == 0:
-            base_x, base_y = point[0], point[1]
-
-        temp_point_history[index][0] = (temp_point_history[index][0] -
-                                        base_x) / image_width
-        temp_point_history[index][1] = (temp_point_history[index][1] -
-                                        base_y) / image_height
-
-    # Convert to a one-dimensional list
-    temp_point_history = list(
-        itertools.chain.from_iterable(temp_point_history))
-
-    return temp_point_history
-
-
-def logging_csv(number, mode, landmark_list, point_history_list):
+def logging_csv(number, mode, landmark_list):
     if mode == 0:
         pass
     if mode == 1 and (0 <= number <= 9):
@@ -464,11 +370,6 @@ def logging_csv(number, mode, landmark_list, point_history_list):
         with open(csv_path, 'a', newline="") as f:
             writer = csv.writer(f)
             writer.writerow([number, *landmark_list])
-    if mode == 2 and (0 <= number <= 9):
-        csv_path = 'model/point_history_classifier/point_history.csv'
-        with open(csv_path, 'a', newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow([number, *point_history_list])
     return
 
 
@@ -572,87 +473,87 @@ def draw_landmarks(image, landmark_point):
 
     # Key Points
     for index, landmark in enumerate(landmark_point):
-        if index == 0:  # 手首1
+        if index == 0:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 1:  # 手首2
+        if index == 1:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 2:  # 親指：付け根
+        if index == 2:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 3:  # 親指：第1関節
+        if index == 3: 
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 4:  # 親指：指先
+        if index == 4: 
             cv.circle(image, (landmark[0], landmark[1]), 8, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 8, (0, 0, 0), 1)
-        if index == 5:  # 人差指：付け根
+        if index == 5: 
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 6:  # 人差指：第2関節
+        if index == 6:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 7:  # 人差指：第1関節
+        if index == 7: 
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 8:  # 人差指：指先
+        if index == 8:
             cv.circle(image, (landmark[0], landmark[1]), 8, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 8, (0, 0, 0), 1)
-        if index == 9:  # 中指：付け根
+        if index == 9: 
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 10:  # 中指：第2関節
+        if index == 10:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 11:  # 中指：第1関節
+        if index == 11:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 12:  # 中指：指先
+        if index == 12:
             cv.circle(image, (landmark[0], landmark[1]), 8, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 8, (0, 0, 0), 1)
-        if index == 13:  # 薬指：付け根
+        if index == 13:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 14:  # 薬指：第2関節
+        if index == 14:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 15:  # 薬指：第1関節
+        if index == 15:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 16:  # 薬指：指先
+        if index == 16:
             cv.circle(image, (landmark[0], landmark[1]), 8, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 8, (0, 0, 0), 1)
-        if index == 17:  # 小指：付け根
+        if index == 17:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 18:  # 小指：第2関節
+        if index == 18:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 19:  # 小指：第1関節
+        if index == 19:
             cv.circle(image, (landmark[0], landmark[1]), 5, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 5, (0, 0, 0), 1)
-        if index == 20:  # 小指：指先
+        if index == 20:
             cv.circle(image, (landmark[0], landmark[1]), 8, (255, 255, 255),
                       -1)
             cv.circle(image, (landmark[0], landmark[1]), 8, (0, 0, 0), 1)

@@ -1,0 +1,26 @@
+{
+  "package_name": "crazyflie_interfaces",
+  "non_idl_tuples": [
+    "/home/johann/swarmsense/crazyflie_interfaces:msg/ConnectionStatistics.msg",
+    "/home/johann/swarmsense/crazyflie_interfaces:msg/ConnectionStatisticsArray.msg",
+    "/home/johann/swarmsense/crazyflie_interfaces:msg/FullState.msg",
+    "/home/johann/swarmsense/crazyflie_interfaces:msg/LogDataGeneric.msg",
+    "/home/johann/swarmsense/crazyflie_interfaces:msg/Hover.msg",
+    "/home/johann/swarmsense/crazyflie_interfaces:msg/LogBlock.msg",
+    "/home/johann/swarmsense/crazyflie_interfaces:msg/Position.msg",
+    "/home/johann/swarmsense/crazyflie_interfaces:msg/Status.msg",
+    "/home/johann/swarmsense/crazyflie_interfaces:msg/TrajectoryPolynomialPiece.msg",
+    "/home/johann/swarmsense/crazyflie_interfaces:msg/VelocityWorld.msg",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/GoTo.srv",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/Land.srv",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/NotifySetpointsStop.srv",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/SetGroupMask.srv",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/StartTrajectory.srv",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/Stop.srv",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/Takeoff.srv",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/UpdateParams.srv",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/UploadTrajectory.srv",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/RemoveLogging.srv",
+    "/home/johann/swarmsense/crazyflie_interfaces:srv/AddLogging.srv"
+  ]
+}
