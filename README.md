@@ -1,3 +1,20 @@
+
+
+# Swarmsense: Probabilistic Robotics Final Project
+
+This project was forked from the original Crazyswarm2 repository and all setup steps should be taken from the official Crazyswarm2 documentation seen below.
+
+For the `gesture_control.py` in the `crazyflie_examples` package, our code was based on this [hand gesture recognition](https://github.com/kinivi/hand-gesture-recognition-mediapipe) repo. This requires:
+
+
+- mediapipe 0.8.11 (Original repo has incorrect version)
+- OpenCV 3.4.2 or Later
+- Tensorflow 2.8.0 (We fixed it 2.8.0 for shared dependency conflict reasons with mediapipe)
+- tf-nightly 2.5.0.dev or later (Only when creating a TFLite for an LSTM model)
+- scikit-learn 0.23.2 or Later (Only if you want to display the confusion matrix)
+- matplotlib 3.3.2 or Later (Only if you want to display the confusion matrix)
+
+
 [![ROS 2](https://github.com/IMRCLab/crazyswarm2/actions/workflows/ci-ros2.yml/badge.svg)](https://github.com/IMRCLab/crazyswarm2/actions/workflows/ci-ros2.yml)
 
 # Crazyswarm2
