@@ -13,6 +13,7 @@ install(DIRECTORY
   config
   data
   launch
+  crazyflie_examples/model
   DESTINATION share/${PROJECT_NAME}/
 )
 
