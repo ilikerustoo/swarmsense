@@ -2,7 +2,23 @@
 
 # Swarmsense: Probabilistic Robotics Final Project
 
-This project was forked from the original Crazyswarm2 repository and all setup steps should be taken from the official Crazyswarm2 documentation seen below.
+This project was forked from the original Crazyswarm2 repository and all setup steps should be taken from the official Crazyswarm2 documentation seen below and linked [here](https://imrclab.github.io/crazyswarm2/installation.html). 
+
+Example:
+
+Set up your ROS 2 workspace
+
+```
+mkdir -p ros2_ws/src
+cd ros2_ws/src
+git clone git@github.com:ilikerustoo/swarmsense.git--recursive
+```
+
+and then build your ROS 2 workspace
+```
+cd ../
+colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
+```
 
 For the `gesture_control.py` in the `crazyflie_examples` package, our code was based on this [hand gesture recognition](https://github.com/kinivi/hand-gesture-recognition-mediapipe) repo. This requires:
 
@@ -54,4 +70,5 @@ Please open an [Issue](https://github.com/IMRCLab/crazyswarm2/issues) if you bel
  - Install `nicegui` for simulation and visuals of drone in 3D space
  - Install the official Bitcraze client using `pip install cfclient` to set cf unique addresses or firmware upgreades
  - Only use the older crazyradio PA
+ - Assumes you have an integrated camera. `gesture_control.py` has the ability to take in other camera but we did not spend time to get this working.
  
