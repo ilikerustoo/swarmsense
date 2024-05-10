@@ -14,6 +14,19 @@ For the `gesture_control.py` in the `crazyflie_examples` package, our code was b
 - scikit-learn 0.23.2 or Later (Only if you want to display the confusion matrix)
 - matplotlib 3.3.2 or Later (Only if you want to display the confusion matrix)
 
+When running in a simulation or with cpp backend, run 
+```
+[terminal1]$ ros2 launch crazyflie launch.py backend:=sim
+```
+or 
+```
+[terminal1]$ ros2 launch crazyflie launch.py
+```
+and then
+```
+[terminal2]$ ros2 run crazyflie_examples control_gesture
+```
+
 
 [![ROS 2](https://github.com/IMRCLab/crazyswarm2/actions/workflows/ci-ros2.yml/badge.svg)](https://github.com/IMRCLab/crazyswarm2/actions/workflows/ci-ros2.yml)
 
@@ -33,3 +46,12 @@ Please open an [Issue](https://github.com/IMRCLab/crazyswarm2/issues) if you bel
 
 - Bug reports.
 - New feature proposals with details.
+
+
+## SwarmSense Notes
+ - Run and tested on Ubuntu 22.04 with ROS Iron
+ - Please check and correct `crazyflie.yaml` to your crazyflie address setting and set each cf to true or false depending on how man you are connecting, otherwise connection will not work. E.g You are trying to connect one cf, but crazyswarm is expecting two cfs.
+ - Install `nicegui` for simulation and visuals of drone in 3D space
+ - Install the official Bitcraze client using `pip install cfclient` to set cf unique addresses or firmware upgreades
+ - Only use the older crazyradio PA
+ 
